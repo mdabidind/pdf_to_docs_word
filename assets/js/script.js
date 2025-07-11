@@ -1,21 +1,30 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // DOM elements
+    // DOM Elements
     const uploadArea = document.getElementById('upload-area');
     const fileInput = document.getElementById('pdf-file');
-    const convertBtn = document.getElementById('convert-btn');
     const statusDiv = document.getElementById('status');
+    const convertBtn = document.getElementById('convert-btn');
+    const fileNameDisplay = document.getElementById('file-name');
     
-    // Event listeners
-    uploadArea.addEventListener('click', () => fileInput.click());
+    // Event Listeners
+    uploadArea.addEventListener('click', function() {
+        fileInput.click();
+    });
     
-    fileInput.addEventListener('change', async function(e) {
-        if (e.target.files.length === 0) return;
-        
-        const file = e.target.files[0];
-        
+    fileInput.addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            const file = e.target.files[0];
+            handleFileSelection(file);
+        }
+    });
+    
+    convertBtn.addEventListener('click', startConversion);
+    
+    // File Handling
+    function handleFileSelection(file) {
         // Validate file
         if (!file.type.includes('pdf') && !file.name.toLowerCase().endsWith('.pdf')) {
-            showError('Please select a PDF file');
+            showError('Please select a valid PDF file');
             return;
         }
         
@@ -24,128 +33,99 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Show processing UI
-        showProcessing(file.name);
+        // Update UI
+        uploadArea.style.display = 'none';
+        statusDiv.innerHTML = `
+            <div class="file-selected">
+                <i class="fas fa-file-pdf"></i>
+                <div class="file-info">
+                    <p class="file-name">${file.name}</p>
+                    <p class="file-size">${formatFileSize(file.size)}</p>
+                </div>
+                <button id="change-file" class="btn-change">Change</button>
+            </div>
+            <button id="convert-btn" class="btn-convert">Convert to Word</button>
+        `;
         
-        try {
-            // Read file as base64
-            const base64Content = await toBase64(file);
-            
-            // Trigger GitHub Action
-            const response = await fetch(`https://api.github.com/repos/mdabidind/pdf_to_docs_word/dispatches`, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/vnd.github.everest-preview+json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    event_type: 'pdf_conversion',
-                    client_payload: {
-                        filename: file.name,
-                        content: base64Content
-                    }
-                })
-            });
-            
-            if (!response.ok) throw new Error('Conversion request failed');
-            
-            // Poll for result
-            await pollForConversionResult(file.name.replace('.pdf', '.docx'));
-            
-        } catch (error) {
-            showError(error.message);
-        }
-    });
-    
-    // Helper functions
-    async function toBase64(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result.split(',')[1]);
-            reader.onerror = error => reject(error);
+        // Add event listener to change file button
+        document.getElementById('change-file').addEventListener('click', function() {
+            fileInput.value = '';
+            resetUI();
         });
     }
     
-    async function pollForConversionResult(outputFilename) {
-        const maxAttempts = 20;
-        let attempts = 0;
+    function startConversion() {
+        const file = fileInput.files[0];
+        if (!file) return;
         
-        while (attempts < maxAttempts) {
-            attempts++;
-            updateStatus(`Processing... (attempt ${attempts}/${maxAttempts})`);
-            
-            try {
-                const exists = await checkFileExists(
-                    `https://github.com/mdabidind/pdf_to_docs_word/releases/download/conversion/${outputFilename}`
-                );
-                if (exists) {
-                    showSuccess(outputFilename);
-                    return;
-                }
-                
-                await new Promise(resolve => setTimeout(resolve, 5000));
-            } catch (error) {
-                throw error;
-            }
-        }
-        
-        throw new Error('Conversion timeout');
-    }
-    
-    async function checkFileExists(url) {
-        try {
-            const response = await fetch(url, { method: 'HEAD' });
-            return response.ok;
-        } catch {
-            return false;
-        }
-    }
-    
-    function showProcessing(filename) {
-        uploadArea.style.display = 'none';
+        // Show processing UI
         statusDiv.innerHTML = `
             <div class="processing">
                 <div class="spinner"></div>
-                <p>Converting ${filename}...</p>
+                <p>Converting ${file.name}...</p>
                 <div class="progress-bar">
                     <div class="progress"></div>
                 </div>
             </div>
         `;
+        
+        // Here you would add your actual conversion logic
+        // For now we'll simulate conversion
+        simulateConversion(file.name);
     }
     
-    function updateStatus(message) {
-        const messageEl = statusDiv.querySelector('p');
-        if (messageEl) messageEl.textContent = message;
+    function simulateConversion(filename) {
+        let progress = 0;
+        const progressBar = document.querySelector('.progress');
+        const interval = setInterval(() => {
+            progress += 5;
+            progressBar.style.width = `${progress}%`;
+            
+            if (progress >= 100) {
+                clearInterval(interval);
+                showConversionResult(filename.replace('.pdf', '.docx'));
+            }
+        }, 300);
     }
     
-    function showSuccess(filename) {
+    function showConversionResult(outputFilename) {
         statusDiv.innerHTML = `
-            <div class="success">
+            <div class="result">
                 <i class="fas fa-check-circle"></i>
                 <p>Conversion complete!</p>
-                <a href="https://github.com/mdabidind/pdf_to_docs_word/releases/download/conversion/${filename}" 
-                   class="download-btn" download="${filename}">
-                    Download Word File
+                <a href="#" class="btn-download" download="${outputFilename}">
+                    Download ${outputFilename}
                 </a>
+                <button id="new-conversion" class="btn-new">Convert Another</button>
             </div>
         `;
+        
+        document.getElementById('new-conversion').addEventListener('click', resetUI);
     }
     
     function showError(message) {
         statusDiv.innerHTML = `
             <div class="error">
                 <i class="fas fa-times-circle"></i>
-                <p>Error: ${message}</p>
-                <button class="retry-btn">Try Again</button>
+                <p>${message}</p>
+                <button class="btn-retry">Try Again</button>
             </div>
         `;
         
-        statusDiv.querySelector('.retry-btn').addEventListener('click', () => {
-            fileInput.value = '';
-            statusDiv.innerHTML = '';
-            uploadArea.style.display = 'block';
-        });
+        document.querySelector('.btn-retry').addEventListener('click', resetUI);
+    }
+    
+    function resetUI() {
+        fileInput.value = '';
+        statusDiv.innerHTML = '';
+        uploadArea.style.display = 'block';
+    }
+    
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
     }
 });
