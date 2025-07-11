@@ -4,112 +4,311 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF to Word Converter | PDFToolsLover</title>
-    <meta name="description" content="Convert PDF to Word documents online for free. Perfect formatting preservation. No registration required.">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="description" content="Convert PDF files to editable Word documents with perfect formatting preservation">
+    
+    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    
     <style>
+        /* Basic Reset */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+        
         body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+            padding: 20px;
         }
-        .converter-card {
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            overflow: hidden;
-            border: none;
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
+        
+        h1 {
+            text-align: center;
+            color: #1e40af;
+            margin-bottom: 1rem;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 2rem;
+        }
+        
+        /* Upload Area */
         .upload-area {
+            border: 2px dashed #94a3b8;
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            text-align: center;
             cursor: pointer;
-            transition: all 0.3s;
-            border: 2px dashed #dee2e6;
-            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+            background-color: #f8fafc;
         }
+        
         .upload-area:hover {
-            background-color: #f1f1f1;
-            border-color: #4e73df;
+            border-color: #1e40af;
+            background-color: #f1f5f9;
         }
-        .drag-over {
-            background-color: #e9ecef !important;
-            border-color: #4e73df !important;
+        
+        .upload-area i {
+            font-size: 3.5rem;
+            color: #e11d48;
+            margin-bottom: 1rem;
         }
-        #status-details {
-            max-height: 150px;
-            overflow-y: auto;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            padding: 10px;
+        
+        .upload-area h3 {
+            font-size: 1.25rem;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
         }
-        .status-entry {
-            border-bottom: 1px solid #eee;
-            padding: 3px 0;
+        
+        .upload-area p {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        
+        #pdf-file {
+            display: none;
+        }
+        
+        /* Status Area */
+        #status-area {
+            display: none;
+            margin-top: 1.5rem;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .file-display {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: #f8fafc;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .file-display i {
+            font-size: 2.5rem;
+            color: #e11d48;
+        }
+        
+        .file-info-text {
+            flex-grow: 1;
+            text-align: left;
+        }
+        
+        .filename {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+            word-break: break-all;
+        }
+        
+        .filesize {
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+        
+        /* Buttons */
+        .btn-change {
+            background: white;
+            border: 1px solid #cbd5e1;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #475569;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-change:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+        }
+        
+        .btn-convert {
+            background-color: #1e40af;
+            color: white;
+            border: none;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 500;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            transition: background 0.2s ease;
+        }
+        
+        .btn-convert:hover {
+            background-color: #1e3a8a;
+        }
+        
+        .btn-convert:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
+        }
+        
+        /* Progress Bar */
+        .progress-container {
+            margin-bottom: 1.5rem;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: #1e40af;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-text {
+            text-align: center;
+            color: #475569;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        
+        /* Results */
+        .result-message, .error-message {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 10px;
+            background: #f8fafc;
+            margin-top: 1.5rem;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .result-message i {
+            color: #16a34a;
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .error-message i {
+            color: #dc2626;
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .result-message h4, .error-message h4 {
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+        
+        .btn-download {
+            display: inline-block;
+            background-color: #16a34a;
+            color: white;
+            padding: 0.9rem 1.75rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            margin: 1rem 0;
+            transition: background 0.2s ease;
+        }
+        
+        .btn-download:hover {
+            background-color: #15803d;
+        }
+        
+        .btn-new, .btn-try-again {
+            background: white;
+            border: 1px solid #cbd5e1;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-block;
+            margin-top: 1rem;
+            font-weight: 500;
+            color: #475569;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-new:hover, .btn-try-again:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .container {
+                padding: 1.5rem;
+            }
+            
+            .upload-area {
+                padding: 2rem 1rem;
+            }
+            
+            .file-display {
+                flex-direction: column;
+                text-align: center;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container py-4">
-        <div class="text-center mb-4">
-            <h1 class="display-5">PDF to Word Converter</h1>
-            <p class="lead text-muted">Convert PDF files to editable Word documents with perfect formatting</p>
+    <div class="container">
+        <h1>PDF to Word Converter</h1>
+        <p class="subtitle">Convert PDF files to editable Word documents with perfect formatting</p>
+        
+        <div id="upload-area" class="upload-area">
+            <i class="fas fa-file-pdf"></i>
+            <h3>Select PDF File</h3>
+            <p>or drag and drop here</p>
+            <input type="file" id="pdf-file" accept=".pdf">
         </div>
-
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="converter-card card">
-                    <div class="card-header bg-primary text-white">
-                        <h2 class="h5 mb-0"><i class="fas fa-file-word me-2"></i>PDF Conversion</h2>
-                    </div>
-                    <div class="card-body">
-                        <!-- Upload Area -->
-                        <div id="upload-area" class="upload-area text-center py-5">
-                            <i class="fas fa-file-pdf fa-5x mb-3 text-danger"></i>
-                            <h4>Drag & Drop PDF File Here</h4>
-                            <p class="text-muted small mb-2">or</p>
-                            <button id="select-btn" class="btn btn-primary px-4">
-                                <i class="fas fa-folder-open me-2"></i>Select PDF File
-                            </button>
-                            <input type="file" id="pdf-file" accept=".pdf" class="d-none">
-                            <p class="small text-muted mt-3">Max file size: 5MB</p>
-                        </div>
-
-                        <!-- Processing Area (initially hidden) -->
-                        <div id="processing-area" style="display: none;">
-                            <div class="text-center py-3">
-                                <div id="processing-spinner" class="mb-3">
-                                    <i class="fas fa-spinner fa-spin fa-3x text-primary"></i>
-                                </div>
-                                <h4 id="status-message">Preparing conversion...</h4>
-                                <div class="progress mt-3" style="height: 8px;">
-                                    <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" 
-                                         role="progressbar" style="width: 0%"></div>
-                                </div>
-                                <div id="file-info" class="small text-muted mt-2"></div>
-                            </div>
-
-                            <!-- Detailed Status Updates -->
-                            <div class="mt-4">
-                                <h5 class="h6 mb-2">Conversion Log:</h5>
-                                <div id="status-details" class="small text-muted p-2"></div>
-                            </div>
-                        </div>
-
-                        <!-- Result Area (initially hidden) -->
-                        <div id="result-area" class="text-center py-3" style="display: none;">
-                            <i id="result-icon" class="fas fa-5x mb-3"></i>
-                            <h4 id="result-message"></h4>
-                            <div id="result-content"></div>
-                            <button id="new-conversion-btn" class="btn btn-primary mt-3">
-                                <i class="fas fa-redo me-2"></i>Convert Another File
-                            </button>
-                        </div>
-                    </div>
-                    <div class="card-footer text-muted small">
-                        <i class="fas fa-info-circle me-1"></i> Files are processed securely and deleted immediately after conversion.
-                    </div>
-                </div>
+        
+        <div id="status-area" class="status-area">
+            <div id="file-info" class="file-display">
+                <!-- Dynamic content will be inserted here by JavaScript -->
+            </div>
+            
+            <div id="progress-container" class="progress-container">
+                <!-- Convert button and progress bar will be inserted here -->
+            </div>
+            
+            <div id="result-container" class="result-container">
+                <!-- Results or errors will be inserted here -->
             </div>
         </div>
+        
+        <p class="disclaimer"><small>Files are processed securely and deleted immediately after conversion.</small></p>
     </div>
 
-    <script src="assets/js/script.js"></script>
+    <!-- JavaScript -->
+    <script src="script.js"></script>
 </body>
 </html>
