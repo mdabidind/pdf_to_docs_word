@@ -1,1 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub PDF to Word Converter</title>
+    <meta name="description" content="Free PDF to Word converter hosted on GitHub Pages">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container py-4">
+        <div class="text-center mb-4">
+            <h1>GitHub PDF to Word Converter</h1>
+            <p class="lead">Convert PDF to DOCX directly from your browser using GitHub Actions</p>
+        </div>
 
+        <div class="card shadow-lg">
+            <div class="card-body text-center py-5" id="upload-area">
+                <i class="fas fa-file-pdf fa-5x mb-3 text-danger"></i>
+                <h4>Select PDF File</h4>
+                <input type="file" id="pdf-file" accept=".pdf" class="d-none">
+                <button class="btn btn-primary mt-3" id="select-btn">Choose File</button>
+            </div>
+
+            <div class="card-footer" id="result-area" style="display:none;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span id="status-text">Ready to convert</span>
+                    <a href="#" class="btn btn-success" id="download-btn" style="display:none;">Download Word File</a>
+                </div>
+                <div class="progress mt-2" id="progress-bar" style="display:none;">
+                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 text-center text-muted">
+            <small>Files are processed on GitHub servers and deleted immediately after conversion</small>
+        </div>
+    </div>
+
+    <script src="assets/js/script.js"></script>
+</body>
+</html>
