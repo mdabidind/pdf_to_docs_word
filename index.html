@@ -3,43 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub PDF to Word Converter</title>
-    <meta name="description" content="Free PDF to Word converter hosted on GitHub Pages">
+    <title>PDF to Word Converter | PDFToolsLover</title>
+    <meta name="description" content="Free online PDF to Word converter. Convert PDF to editable DOCX files with perfect formatting preservation. No registration required.">
+    <meta name="keywords" content="PDF to Word, PDF to DOCX, online converter, free PDF tools">
+    
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="assets/css/style.css" rel="stylesheet">
+    
+    <!-- Google Ads -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9530934065893781" crossorigin="anonymous"></script>
+    
+    <!-- Custom CSS -->
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        #upload-area {
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+        }
+        #upload-area:hover {
+            background-color: #f1f1f1;
+            border-color: #4e73df;
+        }
+        .drag-over {
+            background-color: #e9ecef !important;
+            border-color: #4e73df !important;
+        }
+        .progress {
+            height: 8px;
+        }
+        .btn-primary {
+            background-color: #4e73df;
+            border-color: #4e73df;
+        }
+        .btn-primary:hover {
+            background-color: #3a5ccc;
+            border-color: #3a5ccc;
+        }
+        .feature-card {
+            transition: transform 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
 </head>
 <body>
-    <div class="container py-4">
-        <div class="text-center mb-4">
-            <h1> PDF to Word Converter</h1>
-            <p class="lead">Convert PDF to DOCX </p>
-        </div>
+    <!-- Navbar -->
+    <?php include 'includes/navbar.php'; ?>
 
-        <div class="card shadow-lg">
-            <div class="card-body text-center py-5" id="upload-area">
-                <i class="fas fa-file-pdf fa-5x mb-3 text-danger"></i>
-                <h4>Select PDF File</h4>
-                <input type="file" id="pdf-file" accept=".pdf" class="d-none">
-                <button class="btn btn-primary mt-3" id="select-btn">Choose File</button>
-            </div>
-
-            <div class="card-footer" id="result-area" style="display:none;">
-                <div class="d-flex justify-content-between align-items-center">
-                    <span id="status-text">Ready to convert</span>
-                    <a href="#" class="btn btn-success" id="download-btn" style="display:none;">Download Word File</a>
-                </div>
-                <div class="progress mt-2" id="progress-bar" style="display:none;">
-                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <!-- Left Ad Column (20%) - Desktop Only -->
+            <div class="col-md-2 d-none d-md-block ad-column">
+                <div class="ad-container sticky-top" style="top: 80px;">
+                    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9530934065893781" crossorigin="anonymous"></script>
+                    <!-- Left Sidebar Ad -->
+                    <ins class="adsbygoogle"
+                         style="display:block"
+                         data-ad-client="ca-pub-9530934065893781"
+                         data-ad-slot="1234567890"
+                         data-ad-format="auto"
+                         data-full-width-responsive="true"></ins>
+                    <script>
+                         (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
                 </div>
             </div>
-        </div>
 
-        <div class="mt-4 text-center text-muted">
-            <small>Files are processed </small>
+            <!-- Main Content Column (60%) -->
+            <div class="col-md-8">
+                <div class="converter-container">
+                    <div class="card shadow-lg">
+                        <div class="card-header bg-gradient-primary text-white">
+                            <h2 class="text-center mb-0">PDF to Word Converter</h2>
+                            <p class="text-center mb-0">Convert PDF files to editable Word documents (DOCX)</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center py-5" id="upload-area">
+                                <i class="fas fa-file-pdf fa-5x mb-3 text-danger"></i>
+                                <h4>Drag & Drop PDF File Here</h4>
+                                <p class="text-muted">or</p>
+                                <button class="btn btn-primary" id="select-btn">Select PDF File</button>
+                                <input type="file" id="pdf-file" accept=".pdf" class="d-none">
+                            </div>
+
+                            <div class="mt-4" id="options-area" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="output-format" class="form-label">Output Format:</label>
+                                            <select class="form-select" id="output-format">
+                                                <option value="docx">Word Document (.docx)</option>
+                                                <option value="doc">Word 97-2003 (.doc)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="file-name" class="form-label">Output File Name:</label>
+                                            <input type="text" class="form-control" id="file-name" placeholder="converted_document">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="progress mt-3" id="progress-bar" style="display: none;">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                                </div>
+
+                                <div class="text-center mt-4">
+                                    <button class="btn btn-success" id="convert-btn">Convert to Word</button>
+                                    <button class="btn btn-outline-secondary ms-2" id="cancel-btn">Cancel</button>
+                                    <a href="#" class="btn btn-primary ms-2" id="download-btn" style="display: none;" download>Download Word File</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer text-muted">
+                            <small>Your files are processed securely and deleted immediately after conversion. No server storage.</small>
+                        </div>
+                    </div>
+
+                    <!-- Features Section -->
+                    <div class="row mt-4">
+                        <div class="col-md-4 mb-3">
+                            <div class="feature-card card h-100">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                                    <h5>Secure Conversion</h5>
+                                    <p>All files are processed securely and deleted immediately after conversion.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="feature-card card h-100">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-magic fa-3x text-success mb-3"></i>
+                                    <h5>Perfect Formatting</h5>
+                                    <p>Preserves fonts, images, and layout for accurate Word documents.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="feature-card card h-100">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-bolt fa-3x text-warning mb-3"></i>
+                                    <h5>Fast Processing</h5>
+                                    <p>Optimized conversion engine works quickly even with large files.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- How It Works Section -->
+                    <div class="card mt-4">
+                        <div class="card-header bg-light">
+                            <h4 class="mb-0">How to Convert PDF to Word</h4>
+                        </div>
+                        <div class="card-body">
+                            <ol class="steps">
+                                <li>
+                                    <strong>Upload PDF File</strong>
+                                    <p>Drag & drop your PDF file or click to browse your computer.</p>
+                                </li>
+                                <li>
+                                    <strong>Set Conversion Options</strong>
+                                    <p>Choose output format and file name (optional).</p>
+                                </li>
+                                <li>
+                                    <strong>Convert & Download</strong>
+                                    <p>Click "Convert" and download your Word file when ready.</p>
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Ad Column (20%) - Desktop Only -->
+            <div class="col-md-2 d-none d-md-block ad-column">
+                <div class="ad-container sticky-top" style="top: 80px;">
+                    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9530934065893781" crossorigin="anonymous"></script>
+                    <!-- Right Sidebar Ad -->
+                    <ins class="adsbygoogle"
+                         style="display:block"
+                         data-ad-client="ca-pub-9530934065893781"
+                         data-ad-slot="0987654321"
+                         data-ad-format="auto"
+                         data-full-width-responsive="true"></ins>
+                    <script>
+                         (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Footer -->
+    <?php include 'includes/footer.php'; ?>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
     <script src="assets/js/script.js"></script>
 </body>
 </html>
