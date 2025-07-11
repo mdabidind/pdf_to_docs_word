@@ -8,7 +8,8 @@ on:
 jobs:
   convert:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    env:
+      GITHUB_TOKEN: ${{ secrets.PDF_CONVERTER_TOKEN }}
     
     steps:
     - name: Checkout repository
@@ -21,8 +22,8 @@ jobs:
         
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
         pip install pdf2docx==0.5.7
+        pip install PyGithub==1.58.2
         
     - name: Create input PDF
       env:
@@ -32,19 +33,12 @@ jobs:
         echo "PDF size: $(du -h input.pdf | cut -f1)"
         
     - name: Convert PDF to Word
-      id: convert
       run: |
         python convert.py input.pdf output.docx
-        echo "DOCX size: $(du -h output.docx | cut -f1)"
-        echo "converted=output.docx" >> $GITHUB_OUTPUT
         
-    - name: Upload artifact
+    - name: Upload result
       uses: actions/upload-artifact@v3
       with:
-        name: converted-docx
-        path: ${{ steps.convert.outputs.converted }}
+        name: converted-word-file
+        path: output.docx
         retention-days: 1
-        
-    - name: Create download URL
-      run: |
-        echo "Download URL: https://github.com/$GITHUB_REPOSITORY/releases/download/conversion/output.docx"
