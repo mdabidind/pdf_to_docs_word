@@ -3,98 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF to Word Converter | PDFToolsLover</title>
-    <meta name="description" content="Convert PDF files to editable Word documents with perfect formatting preservation">
+    <title>PDF to Word Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        #upload-area {
+            border: 2px dashed #3498db;
+            border-radius: 5px;
+            padding: 30px;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: background 0.3s;
+        }
+        #upload-area:hover {
+            background: #f0f8ff;
+        }
+        #file-info {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f8f8;
+            border-radius: 5px;
+        }
+        #progress-bar {
+            width: 100%;
+            background: #e0e0e0;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        #progress {
+            height: 10px;
+            background: #3498db;
+            width: 0%;
+            border-radius: 5px;
+            transition: width 0.3s;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>PDF to Word Converter</h1>
+    <p>Convert your PDF files to editable Word documents</p>
     
+    <div id="upload-area">
+        <i class="fas fa-file-pdf" style="font-size: 48px; color: #e74c3c; margin-bottom: 15px;"></i>
+        <h3>Click to select PDF file</h3>
+        <p>or drag and drop here</p>
+        <input type="file" id="pdf-file" accept=".pdf" style="display:none">
+    </div>
+    
+    <div id="file-info">
+        <p>Selected file: <span id="file-name"></span> (<span id="file-size"></span>)</p>
+    </div>
+    
+    <button id="convert-btn" style="display:none">Convert to Word</button>
+    
+    <div id="progress-bar" style="display:none">
+        <div id="progress"></div>
+    </div>
+    
+    <div id="result"></div>
+
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-    
-    <!-- CSS -->
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div class="container">
-        <header class="header">
-            <h1 class="title">PDF to Word Converter</h1>
-            <p class="subtitle">Convert your PDF files to editable Word documents</p>
-        </header>
-        
-        <main class="converter">
-            <!-- Upload Area -->
-            <div id="upload-area" class="upload-area">
-                <div class="upload-icon">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                </div>
-                <h3 class="upload-title">Select PDF File</h3>
-                <p class="upload-hint">or drag and drop here</p>
-                <input type="file" id="pdf-file" accept=".pdf" class="file-input">
-            </div>
-            
-            <!-- Status Area (hidden by default) -->
-            <div id="status-area" class="status-area">
-                <!-- Selected File Info -->
-                <div id="file-info" class="file-info">
-                    <div class="file-icon">
-                        <i class="fas fa-file-pdf"></i>
-                    </div>
-                    <div class="file-details">
-                        <h4 id="file-name" class="file-name">filename.pdf</h4>
-                        <p id="file-size" class="file-size">0 KB</p>
-                    </div>
-                    <button id="change-file" class="change-file-btn">
-                        <i class="fas fa-exchange-alt"></i>
-                    </button>
-                </div>
-                
-                <!-- Conversion Controls -->
-                <div id="controls" class="controls">
-                    <button id="convert-btn" class="convert-btn">
-                        <i class="fas fa-file-word"></i> Convert to Word
-                    </button>
-                    <div class="conversion-options">
-                        <label class="option">
-                            <input type="checkbox" id="preserve-formatting" checked>
-                            Preserve formatting
-                        </label>
-                        <label class="option">
-                            <input type="checkbox" id="optimize-images">
-                            Optimize images
-                        </label>
-                    </div>
-                </div>
-                
-                <!-- Progress Bar -->
-                <div id="progress-container" class="progress-container">
-                    <div class="progress-info">
-                        <span id="progress-text" class="progress-text">Ready to convert</span>
-                        <span id="progress-percent" class="progress-percent">0%</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div id="progress" class="progress"></div>
-                    </div>
-                </div>
-                
-                <!-- Result Area -->
-                <div id="result-container" class="result-container">
-                    <!-- Will be filled dynamically -->
-                </div>
-            </div>
-        </main>
-        
-        <footer class="footer">
-            <p class="disclaimer">
-                <i class="fas fa-lock"></i> Files are processed securely and deleted immediately after conversion
-            </p>
-            <p class="credits">
-                PDF to Word Converter by PDFToolsLover
-            </p>
-        </footer>
-    </div>
-
-    <!-- JavaScript -->
     <script src="script.js"></script>
 </body>
 </html>
