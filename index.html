@@ -1,101 +1,60 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF to Word Converter</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            text-align: center;
+    <title>PDF Converter Test</title>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Create file input programmatically to avoid any HTML issues
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.pdf';
+        fileInput.style.display = 'none';
+        document.body.appendChild(fileInput);
+        
+        // Create visible button
+        const btn = document.createElement('button');
+        btn.textContent = 'Select PDF File';
+        document.body.appendChild(btn);
+        
+        // Create file info display
+        const fileInfo = document.createElement('div');
+        fileInfo.style.marginTop = '20px';
+        document.body.appendChild(fileInfo);
+        
+        // Button click handler
+        btn.addEventListener('click', function() {
+            console.log("Button clicked - triggering file input");
+            fileInput.click();
+        });
+        
+        // File selection handler
+        fileInput.addEventListener('change', function() {
+            console.log("File input change event fired");
+            
+            if (this.files && this.files.length > 0) {
+                const file = this.files[0];
+                console.log("File selected:", file.name);
+                
+                fileInfo.innerHTML = `
+                    <p>Selected: ${file.name}</p>
+                    <p>Size: ${formatFileSize(file.size)}</p>
+                `;
+            } else {
+                console.log("No files selected");
+            }
+        });
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
         }
-        #upload-area {
-            border: 2px dashed #3498db;
-            border-radius: 5px;
-            padding: 30px;
-            cursor: pointer;
-            margin: 20px 0;
-            transition: background 0.3s;
-        }
-        #upload-area:hover {
-            background: #f0f8ff;
-        }
-        #file-info {
-            display: none;
-            margin-top: 20px;
-            padding: 15px;
-            background: #f8f8f8;
-            border-radius: 5px;
-        }
-        #progress-bar {
-            width: 100%;
-            background: #e0e0e0;
-            border-radius: 5px;
-            margin: 10px 0;
-        }
-        #progress {
-            height: 10px;
-            background: #3498db;
-            width: 0%;
-            border-radius: 5px;
-            transition: width 0.3s;
-        }
-        button {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 5px;
-        }
-        button:hover {
-            background: #2980b9;
-        }
-        #result {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 5px;
-        }
-        .success {
-            background: #d4edda;
-            color: #155724;
-        }
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-        }
-    </style>
+    });
+    </script>
 </head>
 <body>
-    <h1>PDF to Word Converter</h1>
-    <p>Convert your PDF files to editable Word documents</p>
-    
-    <div id="upload-area">
-        <i class="fas fa-file-pdf" style="font-size: 48px; color: #e74c3c; margin-bottom: 15px;"></i>
-        <h3>Click to select PDF file</h3>
-        <p>or drag and drop here</p>
-        <input type="file" id="pdf-file" accept=".pdf" style="display:none">
-    </div>
-    
-    <div id="file-info">
-        <p>Selected file: <span id="file-name"></span> (<span id="file-size"></span>)</p>
-    </div>
-    
-    <button id="convert-btn" style="display:none">Convert to Word</button>
-    
-    <div id="progress-bar" style="display:none">
-        <div id="progress"></div>
-    </div>
-    
-    <div id="result"></div>
-
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <script src="script.js"></script>
+    <!-- All elements created by JavaScript -->
 </body>
 </html>
