@@ -12,300 +12,86 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     
-    <style>
-        /* Basic Reset */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Poppins', sans-serif;
-        }
-        
-        body {
-            background-color: #f8fafc;
-            color: #334155;
-            line-height: 1.6;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        }
-        
-        h1 {
-            text-align: center;
-            color: #1e40af;
-            margin-bottom: 1rem;
-        }
-        
-        .subtitle {
-            text-align: center;
-            color: #64748b;
-            margin-bottom: 2rem;
-        }
-        
-        /* Upload Area */
-        .upload-area {
-            border: 2px dashed #94a3b8;
-            border-radius: 12px;
-            padding: 3rem 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 1.5rem;
-            background-color: #f8fafc;
-        }
-        
-        .upload-area:hover {
-            border-color: #1e40af;
-            background-color: #f1f5f9;
-        }
-        
-        .upload-area i {
-            font-size: 3.5rem;
-            color: #e11d48;
-            margin-bottom: 1rem;
-        }
-        
-        .upload-area h3 {
-            font-size: 1.25rem;
-            color: #1e293b;
-            margin-bottom: 0.5rem;
-        }
-        
-        .upload-area p {
-            color: #64748b;
-            font-size: 0.9rem;
-        }
-        
-        #pdf-file {
-            display: none;
-        }
-        
-        /* Status Area */
-        #status-area {
-            display: none;
-            margin-top: 1.5rem;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .file-display {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1.25rem;
-            background: #f8fafc;
-            border-radius: 10px;
-            margin-bottom: 1.5rem;
-            border: 1px solid #e2e8f0;
-        }
-        
-        .file-display i {
-            font-size: 2.5rem;
-            color: #e11d48;
-        }
-        
-        .file-info-text {
-            flex-grow: 1;
-            text-align: left;
-        }
-        
-        .filename {
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 0.25rem;
-            word-break: break-all;
-        }
-        
-        .filesize {
-            color: #64748b;
-            font-size: 0.85rem;
-        }
-        
-        /* Buttons */
-        .btn-change {
-            background: white;
-            border: 1px solid #cbd5e1;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            color: #475569;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-change:hover {
-            background: #f1f5f9;
-            border-color: #94a3b8;
-        }
-        
-        .btn-convert {
-            background-color: #1e40af;
-            color: white;
-            border: none;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: 500;
-            font-size: 1rem;
-            margin-bottom: 1.5rem;
-            transition: background 0.2s ease;
-        }
-        
-        .btn-convert:hover {
-            background-color: #1e3a8a;
-        }
-        
-        .btn-convert:disabled {
-            background-color: #94a3b8;
-            cursor: not-allowed;
-        }
-        
-        /* Progress Bar */
-        .progress-container {
-            margin-bottom: 1.5rem;
-        }
-        
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background-color: #e2e8f0;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 1rem;
-        }
-        
-        .progress {
-            height: 100%;
-            background-color: #1e40af;
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-        
-        .progress-text {
-            text-align: center;
-            color: #475569;
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
-        }
-        
-        /* Results */
-        .result-message, .error-message {
-            text-align: center;
-            padding: 1.5rem;
-            border-radius: 10px;
-            background: #f8fafc;
-            margin-top: 1.5rem;
-            animation: fadeIn 0.5s ease;
-        }
-        
-        .result-message i {
-            color: #16a34a;
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-        }
-        
-        .error-message i {
-            color: #dc2626;
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-        }
-        
-        .result-message h4, .error-message h4 {
-            margin-bottom: 1rem;
-            color: #1e293b;
-        }
-        
-        .btn-download {
-            display: inline-block;
-            background-color: #16a34a;
-            color: white;
-            padding: 0.9rem 1.75rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 500;
-            margin: 1rem 0;
-            transition: background 0.2s ease;
-        }
-        
-        .btn-download:hover {
-            background-color: #15803d;
-        }
-        
-        .btn-new, .btn-try-again {
-            background: white;
-            border: 1px solid #cbd5e1;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            cursor: pointer;
-            display: inline-block;
-            margin-top: 1rem;
-            font-weight: 500;
-            color: #475569;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-new:hover, .btn-try-again:hover {
-            background: #f1f5f9;
-            border-color: #94a3b8;
-        }
-        
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* Responsive Design */
-        @media (max-width: 600px) {
-            .container {
-                padding: 1.5rem;
-            }
-            
-            .upload-area {
-                padding: 2rem 1rem;
-            }
-            
-            .file-display {
-                flex-direction: column;
-                text-align: center;
-            }
-        }
-    </style>
+    <!-- CSS -->
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>PDF to Word Converter</h1>
-        <p class="subtitle">Convert PDF files to editable Word documents with perfect formatting</p>
+        <header class="header">
+            <h1 class="title">PDF to Word Converter</h1>
+            <p class="subtitle">Convert your PDF files to editable Word documents</p>
+        </header>
         
-        <div id="upload-area" class="upload-area">
-            <i class="fas fa-file-pdf"></i>
-            <h3>Select PDF File</h3>
-            <p>or drag and drop here</p>
-            <input type="file" id="pdf-file" accept=".pdf">
-        </div>
-        
-        <div id="status-area" class="status-area">
-            <div id="file-info" class="file-display">
-                <!-- Dynamic content will be inserted here by JavaScript -->
+        <main class="converter">
+            <!-- Upload Area -->
+            <div id="upload-area" class="upload-area">
+                <div class="upload-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <h3 class="upload-title">Select PDF File</h3>
+                <p class="upload-hint">or drag and drop here</p>
+                <input type="file" id="pdf-file" accept=".pdf" class="file-input">
             </div>
             
-            <div id="progress-container" class="progress-container">
-                <!-- Convert button and progress bar will be inserted here -->
+            <!-- Status Area (hidden by default) -->
+            <div id="status-area" class="status-area">
+                <!-- Selected File Info -->
+                <div id="file-info" class="file-info">
+                    <div class="file-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <div class="file-details">
+                        <h4 id="file-name" class="file-name">filename.pdf</h4>
+                        <p id="file-size" class="file-size">0 KB</p>
+                    </div>
+                    <button id="change-file" class="change-file-btn">
+                        <i class="fas fa-exchange-alt"></i>
+                    </button>
+                </div>
+                
+                <!-- Conversion Controls -->
+                <div id="controls" class="controls">
+                    <button id="convert-btn" class="convert-btn">
+                        <i class="fas fa-file-word"></i> Convert to Word
+                    </button>
+                    <div class="conversion-options">
+                        <label class="option">
+                            <input type="checkbox" id="preserve-formatting" checked>
+                            Preserve formatting
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" id="optimize-images">
+                            Optimize images
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div id="progress-container" class="progress-container">
+                    <div class="progress-info">
+                        <span id="progress-text" class="progress-text">Ready to convert</span>
+                        <span id="progress-percent" class="progress-percent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="progress" class="progress"></div>
+                    </div>
+                </div>
+                
+                <!-- Result Area -->
+                <div id="result-container" class="result-container">
+                    <!-- Will be filled dynamically -->
+                </div>
             </div>
-            
-            <div id="result-container" class="result-container">
-                <!-- Results or errors will be inserted here -->
-            </div>
-        </div>
+        </main>
         
-        <p class="disclaimer"><small>Files are processed securely and deleted immediately after conversion.</small></p>
+        <footer class="footer">
+            <p class="disclaimer">
+                <i class="fas fa-lock"></i> Files are processed securely and deleted immediately after conversion
+            </p>
+            <p class="credits">
+                PDF to Word Converter by PDFToolsLover
+            </p>
+        </footer>
     </div>
 
     <!-- JavaScript -->
