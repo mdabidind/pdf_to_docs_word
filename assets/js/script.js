@@ -1,48 +1,66 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // DOM Elements
+    // Get all elements
     const uploadArea = document.getElementById('upload-area');
     const fileInput = document.getElementById('pdf-file');
-    const statusArea = document.getElementById('status-area');
     const fileInfo = document.getElementById('file-info');
-    const progressContainer = document.getElementById('progress-container');
-    const resultContainer = document.getElementById('result-container');
-
-    // State
-    let selectedFile = null;
+    const fileName = document.getElementById('file-name');
+    const fileSize = document.getElementById('file-size');
+    const convertBtn = document.getElementById('convert-btn');
+    const progressBar = document.getElementById('progress-bar');
+    const progress = document.getElementById('progress');
+    const resultDiv = document.getElementById('result');
 
     // Debugging
-    console.log('PDF Converter initialized');
-    console.log('Elements:', {uploadArea, fileInput, statusArea});
+    console.log("Script loaded successfully");
+    console.log("Elements found:", {uploadArea, fileInput, fileInfo, convertBtn});
 
-    // Event Listeners
+    // Click on upload area
     uploadArea.addEventListener('click', function() {
-        console.log('Upload area clicked');
-        fileInput.value = ''; // Reset to allow same file re-selection
+        console.log("Upload area clicked");
         fileInput.click();
     });
 
+    // File selection changed
     fileInput.addEventListener('change', function(e) {
-        console.log('File input changed');
-        if (e.target.files.length > 0) {
-            handleFileSelection(e.target.files[0]);
+        console.log("File input changed");
+        
+        if (this.files && this.files.length > 0) {
+            const file = this.files[0];
+            console.log("File selected:", file.name);
+            
+            // Validate file type
+            if (!file.type.includes('pdf') && !file.name.toLowerCase().endsWith('.pdf')) {
+                showResult('Please select a PDF file', 'error');
+                return;
+            }
+            
+            // Update UI
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            fileInfo.style.display = 'block';
+            convertBtn.style.display = 'inline-block';
+            
+            // Store the file for conversion
+            window.selectedFile = file;
         }
     });
 
-    // Drag and Drop
+    // Drag and drop functionality
     uploadArea.addEventListener('dragover', function(e) {
         e.preventDefault();
-        this.classList.add('dragover');
-        console.log('File dragged over');
+        this.style.borderColor = '#2ecc71';
+        this.style.background = '#e8f8f5';
     });
 
     uploadArea.addEventListener('dragleave', function() {
-        this.classList.remove('dragover');
+        this.style.borderColor = '#3498db';
+        this.style.background = '';
     });
 
     uploadArea.addEventListener('drop', function(e) {
         e.preventDefault();
-        this.classList.remove('dragover');
-        console.log('File dropped');
+        this.style.borderColor = '#3498db';
+        this.style.background = '';
         
         if (e.dataTransfer.files.length > 0) {
             fileInput.files = e.dataTransfer.files;
@@ -51,89 +69,28 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // File Selection Handler
-    function handleFileSelection(file) {
-        console.log('Handling file:', file.name);
-        
-        // Validate file
-        if (!validateFile(file)) return;
-
-        // Store file
-        selectedFile = file;
-        
-        // Update UI
-        uploadArea.style.display = 'none';
-        statusArea.style.display = 'block';
-        
-        fileInfo.innerHTML = `
-            <i class="fas fa-file-pdf"></i>
-            <div class="file-info-text">
-                <p class="filename">${file.name}</p>
-                <p class="filesize">${formatFileSize(file.size)}</p>
-            </div>
-            <button id="change-file" class="btn-change">Change</button>
-        `;
-
-        progressContainer.innerHTML = `
-            <button id="convert-btn" class="btn-convert">Convert to Word</button>
-            <div class="progress-bar">
-                <div class="progress"></div>
-            </div>
-            <p class="progress-text">Ready to convert</p>
-        `;
-
-        // Add event listeners to new elements
-        document.getElementById('change-file').addEventListener('click', resetUI);
-        document.getElementById('convert-btn').addEventListener('click', function() {
-            startConversion(selectedFile);
-        });
-    }
-
-    // File Validation
-    function validateFile(file) {
-        // Check if file exists
-        if (!file) {
-            showError('No file selected');
-            return false;
+    // Convert button click
+    convertBtn.addEventListener('click', function() {
+        if (!window.selectedFile) {
+            showResult('No file selected', 'error');
+            return;
         }
-
-        // Check if PDF
-        const isPDF = file.type === 'application/pdf' || 
-                     file.name.toLowerCase().endsWith('.pdf');
-        if (!isPDF) {
-            showError('Please select a valid PDF file');
-            return false;
-        }
-
-        // Check file size (5MB max)
-        if (file.size > 5 * 1024 * 1024) {
-            showError('File size exceeds 5MB limit');
-            return false;
-        }
-
-        return true;
-    }
-
-    // Start Conversion
-    function startConversion(file) {
-        console.log('Starting conversion for:', file.name);
         
-        // Update UI
-        const convertBtn = document.getElementById('convert-btn');
+        console.log("Starting conversion for:", window.selectedFile.name);
+        convertFile(window.selectedFile);
+    });
+
+    // File conversion function
+    function convertFile(file) {
+        // Show progress
+        progressBar.style.display = 'block';
         convertBtn.disabled = true;
-        convertBtn.textContent = 'Converting...';
         
-        const progressBar = document.querySelector('.progress');
-        const progressText = document.querySelector('.progress-text');
-        progressBar.style.width = '0%';
-        progressText.textContent = 'Starting conversion...';
-        
-        // Simulate conversion progress (replace with actual API call)
+        // Simulate conversion progress (replace with actual conversion)
         let progress = 0;
         const interval = setInterval(() => {
             progress += 5;
-            progressBar.style.width = `${progress}%`;
-            progressText.textContent = `Converting... ${progress}%`;
+            progress.style.width = `${progress}%`;
             
             if (progress >= 100) {
                 clearInterval(interval);
@@ -142,49 +99,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 200);
     }
 
-    // Conversion Complete
+    // Conversion complete
     function conversionComplete(outputFilename) {
-        console.log('Conversion complete:', outputFilename);
+        showResult(`Conversion complete! <a href="#" id="download-link">Download ${outputFilename}</a>`, 'success');
         
-        progressContainer.style.display = 'none';
-        resultContainer.innerHTML = `
-            <div class="result-message">
-                <i class="fas fa-check-circle"></i>
-                <h4>Conversion Successful!</h4>
-                <a href="#" class="btn-download" download="${outputFilename}">Download ${outputFilename}</a>
-                <button id="new-conversion" class="btn-new">Convert Another File</button>
-            </div>
-        `;
-        
-        document.getElementById('new-conversion').addEventListener('click', resetUI);
+        // Set up download link
+        document.getElementById('download-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            // In a real app, this would download the converted file
+            alert('Download functionality would be implemented here');
+        });
     }
 
-    // Error Handling
-    function showError(message) {
-        console.error('Error:', message);
-        statusArea.style.display = 'block';
-        resultContainer.innerHTML = `
-            <div class="error-message">
-                <i class="fas fa-exclamation-circle"></i>
-                <h4>Error</h4>
-                <p>${message}</p>
-                <button id="try-again" class="btn-try-again">Try Again</button>
-            </div>
-        `;
-        
-        document.getElementById('try-again').addEventListener('click', resetUI);
-    }
-
-    // Reset UI
-    function resetUI() {
-        console.log('Resetting UI');
-        fileInput.value = '';
-        selectedFile = null;
-        uploadArea.style.display = 'block';
-        statusArea.style.display = 'none';
-        fileInfo.innerHTML = '';
-        progressContainer.innerHTML = '';
-        resultContainer.innerHTML = '';
+    // Show result message
+    function showResult(message, type) {
+        resultDiv.innerHTML = message;
+        resultDiv.className = type;
+        resultDiv.style.display = 'block';
     }
 
     // Format file size
