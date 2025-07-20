@@ -1,0 +1,46 @@
+# create_db.py
+import sqlite3
+from pathlib import Path
+
+def init_db():
+    db_path = Path('instance') / 'database.db'
+    db_path.parent.mkdir(exist_ok=True)
+    
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
+    # Create users table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL
+        )
+    ''')
+    
+    # Create conversions table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS conversions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            original_filename TEXT,
+            converted_filename TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+    
+    # Add admin user
+    from werkzeug.security import generate_password_hash
+    admin_password = generate_password_hash('your-secure-password')
+    cursor.execute(
+        'INSERT OR IGNORE INTO users (username, password) VALUES (?, ?)',
+        ('admin', admin_password)
+    )
+    
+    conn.commit()
+    conn.close()
+    print(f"Database created at {db_path}")
+
+if __name__ == '__main__':
+    init_db()
