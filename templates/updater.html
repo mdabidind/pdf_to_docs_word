@@ -1,0 +1,395 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Tools - PDF Converter{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <h1><i class="fas fa-tools"></i> Admin Tools</h1>
+    
+    <div class="admin-card">
+        <h2><i class="fas fa-info-circle"></i> System Information</h2>
+        <div class="system-info">
+            <div class="info-item">
+                <span class="info-label">Python Version:</span>
+                <span id="python-version" class="info-value">Loading...</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">System Platform:</span>
+                <span id="system-platform" class="info-value">Loading...</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Converter Version:</span>
+                <span class="info-value">2.1.0</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-card">
+        <h2><i class="fas fa-cogs"></i> Tools Management</h2>
+        <div class="tools-list" id="tools-list">
+            <!-- Tools will be loaded dynamically -->
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i> Loading tools information...
+            </div>
+        </div>
+        
+        <div class="admin-actions">
+            <button id="update-all-btn" class="btn btn-primary" disabled>
+                <i class="fas fa-sync-alt"></i> Update All Tools
+            </button>
+            <button id="restart-service-btn" class="btn btn-warning">
+                <i class="fas fa-redo"></i> Restart Service
+            </button>
+        </div>
+    </div>
+
+    <div class="admin-card">
+        <h2><i class="fas fa-cloud-download-alt"></i> Software Updates</h2>
+        <div class="update-status">
+            <div id="update-message">Checking for updates...</div>
+            <div class="progress" id="update-progress-container" style="display: none;">
+                <div class="progress-bar" id="update-progress-bar" role="progressbar" style="width: 0%"></div>
+            </div>
+        </div>
+        <button id="check-updates-btn" class="btn btn-info">
+            <i class="fas fa-search"></i> Check for Updates
+        </button>
+        <button id="install-updates-btn" class="btn btn-success" disabled>
+            <i class="fas fa-download"></i> Install Updates
+        </button>
+    </div>
+
+    <div class="admin-card danger-zone">
+        <h2><i class="fas fa-exclamation-triangle"></i> Danger Zone</h2>
+        <div class="danger-actions">
+            <button id="clear-cache-btn" class="btn btn-danger">
+                <i class="fas fa-trash-alt"></i> Clear Temporary Files
+            </button>
+            <button id="reset-settings-btn" class="btn btn-danger">
+                <i class="fas fa-undo"></i> Reset to Defaults
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load system information
+    fetch('/admin/system-info')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('python-version').textContent = data.python_version;
+            document.getElementById('system-platform').textContent = data.system_platform;
+        })
+        .catch(error => {
+            console.error('Error loading system info:', error);
+        });
+
+    // Load tools status
+    fetch('/admin/tools-status')
+        .then(response => response.json())
+        .then(data => {
+            const toolsList = document.getElementById('tools-list');
+            toolsList.innerHTML = '';
+            
+            data.tools.forEach(tool => {
+                const toolElement = document.createElement('div');
+                toolElement.className = 'tool-item';
+                toolElement.innerHTML = `
+                    <div class="tool-info">
+                        <h3>${tool.name}</h3>
+                        <div class="tool-status ${tool.installed ? 'installed' : 'missing'}">
+                            ${tool.installed ? 
+                                `<i class="fas fa-check-circle"></i> Installed` : 
+                                `<i class="fas fa-times-circle"></i> Not Installed`}
+                            ${tool.version ? `(v${tool.version})` : ''}
+                        </div>
+                    </div>
+                    <button class="btn ${tool.installed ? 'btn-update' : 'btn-install'}" 
+                            data-tool="${tool.name}">
+                        <i class="fas ${tool.installed ? 'fa-sync-alt' : 'fa-download'}"></i>
+                        ${tool.installed ? 'Update' : 'Install'}
+                    </button>
+                `;
+                toolsList.appendChild(toolElement);
+            });
+
+            // Enable update all button if any tools need updating
+            const needsUpdate = data.tools.some(tool => !tool.installed || tool.update_available);
+            document.getElementById('update-all-btn').disabled = !needsUpdate;
+        })
+        .catch(error => {
+            console.error('Error loading tools status:', error);
+            document.getElementById('tools-list').innerHTML = 
+                '<div class="error-message">Failed to load tools information</div>';
+        });
+
+    // Check for updates
+    document.getElementById('check-updates-btn').addEventListener('click', function() {
+        fetch('/admin/check-updates')
+            .then(response => response.json())
+            .then(data => {
+                const updateMessage = document.getElementById('update-message');
+                const installBtn = document.getElementById('install-updates-btn');
+                
+                if (data.update_available) {
+                    updateMessage.innerHTML = `
+                        <i class="fas fa-arrow-circle-up"></i> 
+                        Update available: ${data.latest_version}
+                    `;
+                    installBtn.disabled = false;
+                } else {
+                    updateMessage.innerHTML = `
+                        <i class="fas fa-check-circle"></i> 
+                        You have the latest version
+                    `;
+                    installBtn.disabled = true;
+                }
+            })
+            .catch(error => {
+                document.getElementById('update-message').textContent = 
+                    'Error checking for updates';
+                console.error('Update check failed:', error);
+            });
+    });
+
+    // Install updates
+    document.getElementById('install-updates-btn').addEventListener('click', function() {
+        const progressContainer = document.getElementById('update-progress-container');
+        const progressBar = document.getElementById('update-progress-bar');
+        const updateMessage = document.getElementById('update-message');
+        
+        progressContainer.style.display = 'block';
+        updateMessage.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Installing updates...';
+        
+        // Simulate update progress (in real app, would use WebSocket or polling)
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 10;
+            progressBar.style.width = `${progress}%`;
+            
+            if (progress >= 100) {
+                clearInterval(interval);
+                updateMessage.innerHTML = '<i class="fas fa-check-circle"></i> Updates installed successfully!';
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                    progressBar.style.width = '0%';
+                }, 2000);
+            }
+        }, 500);
+    });
+
+    // Clear cache
+    document.getElementById('clear-cache-btn').addEventListener('click', function() {
+        if (confirm('Are you sure you want to clear all temporary files? This cannot be undone.')) {
+            fetch('/admin/clear-cache', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message || 'Temporary files cleared successfully');
+                })
+                .catch(error => {
+                    alert('Error clearing cache: ' + error.message);
+                });
+        }
+    });
+
+    // Restart service
+    document.getElementById('restart-service-btn').addEventListener('click', function() {
+        if (confirm('Are you sure you want to restart the conversion service? This will interrupt any ongoing conversions.')) {
+            fetch('/admin/restart-service', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message || 'Service restart initiated');
+                })
+                .catch(error => {
+                    alert('Error restarting service: ' + error.message);
+                });
+        }
+    });
+});
+</script>
+
+<style>
+.admin-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.admin-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.admin-card h2 {
+    margin-top: 0;
+    color: #4cc9f0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 10px;
+}
+
+.system-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.info-label {
+    font-weight: bold;
+    color: #a29bfe;
+}
+
+.info-value {
+    color: #ffffff;
+}
+
+.tools-list {
+    margin: 20px 0;
+}
+
+.tool-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.tool-status {
+    font-size: 0.9em;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.tool-status.installed {
+    background: rgba(76, 201, 240, 0.2);
+    color: #4cc9f0;
+}
+
+.tool-status.missing {
+    background: rgba(247, 37, 133, 0.2);
+    color: #f72585;
+}
+
+.admin-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: #4361ee;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #3a56d4;
+}
+
+.btn-info {
+    background: #4cc9f0;
+    color: white;
+}
+
+.btn-info:hover {
+    background: #3ab5d9;
+}
+
+.btn-success {
+    background: #38b000;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #2d8c00;
+}
+
+.btn-warning {
+    background: #ff9e00;
+    color: white;
+}
+
+.btn-warning:hover {
+    background: #e08d00;
+}
+
+.btn-danger {
+    background: #f72585;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #d91a6e;
+}
+
+.btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.danger-zone {
+    border-left: 4px solid #f72585;
+}
+
+.danger-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.progress {
+    height: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    margin: 15px 0;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: #4cc9f0;
+    transition: width 0.3s;
+}
+
+.loading-spinner {
+    text-align: center;
+    padding: 20px;
+    color: #a29bfe;
+}
+
+.error-message {
+    color: #f72585;
+    padding: 15px;
+    text-align: center;
+    background: rgba(247, 37, 133, 0.1);
+    border-radius: 6px;
+}
+</style>
+{% endblock %}
