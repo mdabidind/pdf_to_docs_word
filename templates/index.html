@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF to Word Converter</title>
+    <style>
+        :root {
+            --primary: #4a6cf7;
+            --primary-dark: #3a5bd9;
+            --light: #f8f9ff;
+            --dark: #333;
+            --gray: #ccc;
+            --success: #28a745;
+            --danger: #dc3545;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 2rem;
+        }
+        
+        h1 {
+            color: var(--dark);
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .upload-area {
+            border: 2px dashed var(--gray);
+            padding: 2rem;
+            text-align: center;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: var(--light);
+        }
+        
+        .upload-area.active {
+            border-color: var(--primary);
+            background: var(--light);
+        }
+        
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            display: inline-block;
+            text-decoration: none;
+        }
+        
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+        
+        .btn:disabled {
+            background: var(--gray);
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        #file-input {
+            display: none;
+        }
+        
+        .progress-container {
+            width: 100%;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            margin: 1rem 0;
+            display: none;
+        }
+        
+        .progress-bar {
+            width: 0%;
+            height: 20px;
+            background-color: var(--primary);
+            border-radius: 5px;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+            font-size: 0.8rem;
+            transition: width 0.3s;
+        }
+        
+        .options {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            border: 1px solid #eee;
+            border-radius: 5px;
+        }
+        
+        .option-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        select {
+            width: 100%;
+            padding: 0.5rem;
+            border-radius: 5px;
+            border: 1px solid var(--gray);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+        }
+        
+        input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+        
+        #status {
+            margin: 1rem 0;
+            text-align: center;
+            font-weight: 500;
+            min-height: 1.5rem;
+        }
+        
+        .success {
+            color: var(--success);
+        }
+        
+        .error {
+            color: var(--danger);
+        }
+        
+        .file-info {
+            margin-top: 1rem;
+            font-style: italic;
+            word-break: break-all;
+        }
+        
+        .flash-messages {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .flash-message {
+            padding: 10px 20px;
+            margin-bottom: 10px;
+            background: var(--primary);
+            color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            animation: slideIn 0.3s, fadeOut 0.5s 3s forwards;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        
+        @keyframes fadeOut {
+            to { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PDF to Word Converter</h1>
+        
+        <div id="upload-area" class="upload-area">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1rem;">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <p>Drag & drop your PDF file here or click to browse</p>
+            <input type="file" id="file-input" accept=".pdf">
+            <button type="button" class="btn" id="upload-btn">Select PDF File</button>
+            <p class="file-info" id="file-info"></p>
+        </div>
+        
+        <div class="options">
+            <div class="option-group">
+                <label for="ocr-mode">OCR Mode:</label>
+                <select id="ocr-mode">
+                    <option value="auto">Auto-detect (Recommended)</option>
+                    <option value="force">Force OCR (for scanned PDFs)</option>
+                    <option value="none">No OCR (for digital PDFs)</option>
+                </select>
+            </div>
+            
+            <div class="option-group checkbox-group">
+                <input type="checkbox" id="preserve-layout" checked>
+                <label for="preserve-layout">Preserve original layout</label>
+            </div>
+        </div>
+        
+        <div class="progress-container" id="progress-container">
+            <div class="progress-bar" id="progress-bar">0%</div>
+        </div>
+        
+        <div id="status"></div>
+        
+        <button type="button" class="btn btn-block" id="convert-btn" disabled>Convert to Word</button>
+        
+        <div id="download-section" style="display: none; text-align: center; margin-top: 1rem;">
+            <a href="#" id="download-link" class="btn">Download Word File</a>
+            <p id="converted-filename" style="margin-top: 0.5rem;"></p>
+        </div>
+    </div>
+
+    <div id="flash-messages" class="flash-messages"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('upload-area');
+            const fileInput = document.getElementById('file-input');
+            const uploadBtn = document.getElementById('upload-btn');
+            const convertBtn = document.getElementById('convert-btn');
+            const progressContainer = document.getElementById('progress-container');
+            const progressBar = document.getElementById('progress-bar');
+            const statusDiv = document.getElementById('status');
+            const fileInfo = document.getElementById('file-info');
+            const downloadSection = document.getElementById('download-section');
+            const downloadLink = document.getElementById('download-link');
+            const convertedFilename = document.getElementById('converted-filename');
+            const flashMessages = document.getElementById('flash-messages');
+            
+            let selectedFile = null;
+            let uploadUniqueId = null;
+            
+            // Show flash message
+            function showFlashMessage(message, type = 'info') {
+                const messageEl = document.createElement('div');
+                messageEl.className = `flash-message ${type}`;
+                messageEl.textContent = message;
+                flashMessages.appendChild(messageEl);
+                
+                // Remove after animation
+                setTimeout(() => {
+                    messageEl.remove();
+                }, 3500);
+            }
+            
+            // Handle drag and drop events
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                uploadArea.classList.add('active');
+            }
+            
+            function unhighlight(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                uploadArea.classList.remove('active');
+            }
+            
+            // Handle file selection
+            uploadArea.addEventListener('click', () => fileInput.click());
+            uploadBtn.addEventListener('click', () => fileInput.click());
+            
+            fileInput.addEventListener('change', handleFileSelection);
+            
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                if (e.dataTransfer.files.length) {
+                    fileInput.files = e.dataTransfer.files;
+                    handleFileSelection();
+                }
+            });
+            
+            function handleFileSelection() {
+                const file = fileInput.files[0];
+                if (!file) return;
+                
+                // Validate file type
+                if (!file.name.toLowerCase().endsWith('.pdf')) {
+                    statusDiv.textContent = 'Please upload a PDF file.';
+                    statusDiv.className = 'error';
+                    convertBtn.disabled = true;
+                    showFlashMessage('Only PDF files are allowed', 'error');
+                    return;
+                }
+                
+                // Validate file size
+                if (file.size > {{ MAX_FILE_SIZE }}) {
+                    statusDiv.textContent = 'File is too large (max 50MB).';
+                    statusDiv.className = 'error';
+                    convertBtn.disabled = true;
+                    showFlashMessage('File is too large (max 50MB)', 'error');
+                    return;
+                }
+                
+                selectedFile = file;
+                fileInfo.textContent = `Selected: ${file.name} (${formatFileSize(file.size)})`;
+                statusDiv.textContent = '';
+                convertBtn.disabled = false;
+                
+                // Upload file immediately
+                uploadFile();
+            }
+            
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+            
+            // Upload file to server
+            function uploadFile() {
+                if (!selectedFile) return;
+                
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', '/', true);
+                
+                // Progress bar
+                xhr.upload.onprogress = function(e) {
+                    if (e.lengthComputable) {
+                        const percentComplete = Math.round((e.loaded / e.total) * 100);
+                        progressBar.style.width = percentComplete + '%';
+                        progressBar.textContent = percentComplete + '%';
+                        progressContainer.style.display = 'block';
+                    }
+                };
+                
+                xhr.onload = function() {
+                    progressContainer.style.display = 'none';
+                    
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.status === 'success') {
+                            statusDiv.textContent = 'File uploaded successfully!';
+                            statusDiv.className = 'success';
+                            uploadUniqueId = response.unique_id;
+                            showFlashMessage('File uploaded successfully', 'success');
+                        } else {
+                            statusDiv.textContent = response.message;
+                            statusDiv.className = 'error';
+                            showFlashMessage(response.message, 'error');
+                            convertBtn.disabled = true;
+                        }
+                    } else {
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            statusDiv.textContent = response.message || 'Upload failed';
+                            statusDiv.className = 'error';
+                            showFlashMessage(response.message || 'Upload failed', 'error');
+                        } catch {
+                            statusDiv.textContent = 'Error uploading file';
+                            statusDiv.className = 'error';
+                            showFlashMessage('Error uploading file', 'error');
+                        }
+                        convertBtn.disabled = true;
+                    }
+                };
+                
+                xhr.onerror = function() {
+                    progressContainer.style.display = 'none';
+                    statusDiv.textContent = 'Network error during upload';
+                    statusDiv.className = 'error';
+                    showFlashMessage('Network error during upload', 'error');
+                    convertBtn.disabled = true;
+                };
+                
+                statusDiv.textContent = 'Uploading file...';
+                convertBtn.disabled = true;
+                
+                xhr.send(formData);
+            }
+            
+            // Convert file
+            convertBtn.addEventListener('click', function() {
+                if (!selectedFile || !uploadUniqueId) return;
+                
+                const ocrMode = document.getElementById('ocr-mode').value;
+                const preserveLayout = document.getElementById('preserve-layout').checked;
+                
+                statusDiv.textContent = 'Converting PDF to Word...';
+                statusDiv.className = 'info';
+                convertBtn.disabled = true;
+                
+                fetch('/convert', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        unique_id: uploadUniqueId,
+                        filename: selectedFile.name,
+                        ocr_mode: ocrMode,
+                        preserve_layout: preserveLayout
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        statusDiv.textContent = 'Conversion complete!';
+                        statusDiv.className = 'success';
+                        showFlashMessage('Conversion complete!', 'success');
+                        
+                        // Show download link
+                        downloadLink.href = data.download_url;
+                        convertedFilename.textContent = data.filename;
+                        downloadSection.style.display = 'block';
+                    } else {
+                        statusDiv.textContent = data.message;
+                        statusDiv.className = 'error';
+                        showFlashMessage(data.message, 'error');
+                        convertBtn.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    statusDiv.textContent = 'Error during conversion';
+                    statusDiv.className = 'error';
+                    showFlashMessage('Error during conversion', 'error');
+                    convertBtn.disabled = false;
+                    console.error('Error:', error);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
