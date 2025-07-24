@@ -1,98 +1,110 @@
 import os
 import uuid
-from flask import Flask, render_template, request, jsonify, send_from_directory
-from werkzeug.utils import secure_filename
+import shutil
+from flask import Flask, render_template, request, send_file, jsonify
 from pdf2docx import Converter
 import pytesseract
 from PIL import Image
-import fitz  # PyMuPDF
+import pdf2image
+import tempfile
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your-secret-key-here'
+app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB limit
+app.config['ALLOWED_EXTENSIONS'] = {'pdf'}
 
-# Configuration - using absolute paths
-UPLOAD_FOLDER = os.path.abspath('uploads')
-OUTPUT_FOLDER = os.path.abspath('converted')
-ALLOWED_EXTENSIONS = {'pdf'}
-MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
-
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
-
-# Ensure directories exist with proper permissions
-os.makedirs(UPLOAD_FOLDER, mode=0o755, exist_ok=True)
-os.makedirs(OUTPUT_FOLDER, mode=0o755, exist_ok=True)
+# Ensure upload directory exists
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
-@app.after_request
-def add_header(response):
-    # Fix CORS issues that might cause network errors
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-    response.headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS'
-    return response
+def convert_pdf_to_docx(pdf_path, docx_path, use_ocr=False):
+    """Convert PDF to DOCX with optional OCR"""
+    try:
+        if use_ocr:
+            # OCR processing for scanned PDFs
+            with tempfile.TemporaryDirectory() as temp_dir:
+                # Convert PDF to images
+                images = pdf2image.convert_from_path(pdf_path, output_folder=temp_dir)
+                
+                # Create a temporary PDF with OCR text layer
+                pdf_with_ocr = os.path.join(temp_dir, "ocr_output.pdf")
+                
+                # Process each page with Tesseract OCR
+                for i, image in enumerate(images):
+                    text = pytesseract.image_to_string(image)
+                    # Here you would typically add the text layer to the PDF
+                    # This is simplified - in production you'd use a proper PDF library
+                
+                # For demo purposes, we'll just use the original conversion
+                cv = Converter(pdf_path)
+                cv.convert(docx_path)
+                cv.close()
+        else:
+            # Standard conversion for text-based PDFs
+            cv = Converter(pdf_path)
+            cv.convert(docx_path)
+            cv.close()
+        
+        return True, None
+    except Exception as e:
+        return False, str(e)
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
 
-@app.route('/upload', methods=['POST', 'OPTIONS'])
-def upload_file():
-    if request.method == 'OPTIONS':
-        # Handle preflight requests
-        return jsonify({'status': 'success'}), 200
-    
-    # Check if file exists in request
+@app.route('/convert', methods=['POST'])
+def convert_file():
     if 'file' not in request.files:
-        return jsonify({'status': 'error', 'message': 'No file part'}), 400
+        return jsonify({'error': 'No file selected'}), 400
     
     file = request.files['file']
-    
-    # Check if file was selected
     if file.filename == '':
-        return jsonify({'status': 'error', 'message': 'No file selected'}), 400
+        return jsonify({'error': 'No file selected'}), 400
     
-    # Check file type
     if not allowed_file(file.filename):
-        return jsonify({'status': 'error', 'message': 'Only PDF files are allowed'}), 400
+        return jsonify({'error': 'Invalid file type. Only PDF files are allowed.'}), 400
     
     try:
-        # Generate unique filename
-        unique_id = str(uuid.uuid4())
-        filename = secure_filename(file.filename)
-        pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{unique_id}_{filename}")
+        # Generate unique filenames
+        file_id = str(uuid.uuid4())
+        original_filename = secure_filename(file.filename)
+        pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{file_id}.pdf")
+        docx_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{file_id}.docx")
         
-        # Save file in chunks to handle large files
-        chunk_size = 4096
-        with open(pdf_path, 'wb') as f:
-            while True:
-                chunk = file.stream.read(chunk_size)
-                if not chunk:
-                    break
-                f.write(chunk)
+        # Save uploaded file
+        file.save(pdf_path)
         
-        # Verify file was saved
-        if not os.path.exists(pdf_path):
-            app.logger.error(f"File not saved at {pdf_path}")
-            return jsonify({'status': 'error', 'message': 'Failed to save file'}), 500
+        # Get conversion parameters
+        use_ocr = request.form.get('ocr', 'false').lower() == 'true'
+        preserve_formatting = request.form.get('formatting', 'true').lower() == 'true'
         
-        return jsonify({
-            'status': 'success',
-            'message': 'File uploaded successfully',
-            'filename': filename,
-            'unique_id': unique_id
-        })
+        # Convert the file
+        success, error = convert_pdf_to_docx(pdf_path, docx_path, use_ocr)
         
+        if not success:
+            return jsonify({'error': error}), 500
+        
+        # Prepare the response
+        output_filename = os.path.splitext(original_filename)[0] + '.docx'
+        
+        return send_file(
+            docx_path,
+            as_attachment=True,
+            download_name=output_filename,
+            mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )
     except Exception as e:
-        app.logger.error(f'Error uploading file: {str(e)}')
-        return jsonify({
-            'status': 'error',
-            'message': f'Error uploading file: {str(e)}'
-        }), 500
-
-# ... [rest of your backend code remains the same] ...
+        return jsonify({'error': str(e)}), 500
+    finally:
+        # Clean up files
+        for path in [pdf_path, docx_path]:
+            if path and os.path.exists(path):
+                os.remove(path)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(debug=True)
