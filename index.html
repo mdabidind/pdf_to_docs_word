@@ -1,42 +1,304 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>PDF to Word Converter</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF to Word Converter</title>
+    <style>
+        :root {
+            --primary: #4a6cf7;
+            --primary-dark: #3a5bd9;
+            --light: #f8f9ff;
+            --dark: #333;
+            --gray: #ccc;
+            --danger: #dc3545;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 2rem;
+        }
+        
+        h1 {
+            color: var(--dark);
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .upload-area {
+            border: 2px dashed var(--gray);
+            padding: 2rem;
+            text-align: center;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: var(--light);
+        }
+        
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            display: inline-block;
+            text-decoration: none;
+        }
+        
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+        
+        #file-input {
+            display: none;
+        }
+        
+        .progress-container {
+            width: 100%;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            margin: 1rem 0;
+            display: none;
+        }
+        
+        .progress-bar {
+            width: 0%;
+            height: 20px;
+            background-color: var(--primary);
+            border-radius: 5px;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+            font-size: 0.8rem;
+        }
+        
+        .options {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            border: 1px solid #eee;
+            border-radius: 5px;
+        }
+        
+        .option-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        select, input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+        
+        #status {
+            margin: 1rem 0;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .success {
+            color: #28a745;
+        }
+        
+        .error {
+            color: var(--danger);
+        }
+        
+        .file-info {
+            margin-top: 1rem;
+            font-style: italic;
+        }
+    </style>
 </head>
 <body>
-  <h2>Convert PDF to Word</h2>
-  <form id="uploadForm">
-    <input type="file" name="file" accept="application/pdf" required><br><br>
-    <button type="submit">Convert Now</button>
-  </form>
+    <div class="container">
+        <h1>PDF to Word Converter</h1>
+        
+        <form id="converter-form" method="post" enctype="multipart/form-data">
+            <div class="upload-area" id="upload-area">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1rem;">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <p>Drag & drop your PDF file here or click to browse</p>
+                <input type="file" id="file-input" name="file" accept=".pdf">
+                <button type="button" class="btn" id="upload-btn">Select PDF File</button>
+                <p class="file-info" id="file-info"></p>
+            </div>
+            
+            <div class="options">
+                <div class="option-group">
+                    <label for="ocr-mode">OCR Mode:</label>
+                    <select id="ocr-mode" name="ocr_mode">
+                        <option value="auto">Auto-detect (Recommended)</option>
+                        <option value="force">Force OCR (for scanned PDFs)</option>
+                        <option value="none">No OCR (for digital PDFs)</option>
+                    </select>
+                </div>
+                
+                <div class="option-group">
+                    <input type="checkbox" id="preserve-layout" name="preserve_layout" checked>
+                    <label for="preserve-layout">Preserve original layout</label>
+                </div>
+            </div>
+            
+            <div class="progress-container" id="progress-container">
+                <div class="progress-bar" id="progress-bar">0%</div>
+            </div>
+            
+            <div id="status"></div>
+            
+            <button type="submit" class="btn btn-block" id="convert-btn" disabled>Convert to Word</button>
+        </form>
+    </div>
 
-  <div id="result"></div>
-
-  <script>
-    document.getElementById("uploadForm").addEventListener("submit", function (e) {
-      e.preventDefault();
-      const formData = new FormData(this);
-
-      fetch("https://your-backend-api-url/convert", {
-        method: "POST",
-        body: formData
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.status === "success") {
-          document.getElementById("result").innerHTML =
-            `<p>✅ Converted: <a href="${data.download_url}" target="_blank">Download Word File</a></p>`;
-        } else {
-          document.getElementById("result").innerHTML = "<p>❌ Conversion failed.</p>";
-        }
-      })
-      .catch(err => {
-        console.error(err);
-        document.getElementById("result").innerHTML = "<p>❌ Server not responding.</p>";
-      });
-    });
-  </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('upload-area');
+            const fileInput = document.getElementById('file-input');
+            const uploadBtn = document.getElementById('upload-btn');
+            const convertBtn = document.getElementById('convert-btn');
+            const progressContainer = document.getElementById('progress-container');
+            const progressBar = document.getElementById('progress-bar');
+            const statusDiv = document.getElementById('status');
+            const fileInfo = document.getElementById('file-info');
+            const form = document.getElementById('converter-form');
+            
+            // Handle file selection
+            uploadArea.addEventListener('click', () => fileInput.click());
+            uploadBtn.addEventListener('click', () => fileInput.click());
+            
+            // Drag and drop functionality
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'var(--primary)';
+                uploadArea.style.backgroundColor = 'var(--light)';
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.borderColor = 'var(--gray)';
+                uploadArea.style.backgroundColor = 'transparent';
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'var(--gray)';
+                uploadArea.style.backgroundColor = 'transparent';
+                
+                if (e.dataTransfer.files.length) {
+                    fileInput.files = e.dataTransfer.files;
+                    handleFileSelection();
+                }
+            });
+            
+            fileInput.addEventListener('change', handleFileSelection);
+            
+            function handleFileSelection() {
+                const file = fileInput.files[0];
+                if (!file) return;
+                
+                if (!file.name.toLowerCase().endsWith('.pdf')) {
+                    statusDiv.textContent = 'Please upload a PDF file.';
+                    statusDiv.className = 'error';
+                    convertBtn.disabled = true;
+                    return;
+                }
+                
+                if (file.size > {{ MAX_FILE_SIZE }}) {
+                    statusDiv.textContent = 'File is too large (max 50MB).';
+                    statusDiv.className = 'error';
+                    convertBtn.disabled = true;
+                    return;
+                }
+                
+                fileInfo.textContent = `Selected: ${file.name} (${formatFileSize(file.size)})`;
+                statusDiv.textContent = '';
+                convertBtn.disabled = false;
+            }
+            
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+            
+            // Form submission with progress
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const file = fileInput.files[0];
+                if (!file) return;
+                
+                const formData = new FormData(form);
+                
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', '/', true);
+                
+                // Progress bar
+                xhr.upload.onprogress = function(e) {
+                    if (e.lengthComputable) {
+                        const percentComplete = Math.round((e.loaded / e.total) * 100);
+                        progressBar.style.width = percentComplete + '%';
+                        progressBar.textContent = percentComplete + '%';
+                        progressContainer.style.display = 'block';
+                    }
+                };
+                
+                xhr.onload = function() {
+                    progressContainer.style.display = 'none';
+                    
+                    if (xhr.status === 200) {
+                        // Success - redirected to download
+                    } else {
+                        statusDiv.textContent = 'Error during conversion. Please try again.';
+                        statusDiv.className = 'error';
+                        convertBtn.disabled = false;
+                    }
+                };
+                
+                statusDiv.textContent = 'Uploading and converting...';
+                convertBtn.disabled = true;
+                
+                xhr.send(formData);
+            });
+        });
+    </script>
 </body>
 </html>
