@@ -1,55 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>PDF to Word Converter | PDFToolsLover</title>
-  <meta name="description" content="Convert PDF to Word with OCR. 100% free, online tool from PDFToolsLover. No signup. Accurate formatting & fonts.">
+  <meta charset="UTF-8">
+  <title>PDF to Word Converter</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9530934065893781" crossorigin="anonymous"></script>
-  <style>
-    body { font-family: sans-serif; margin: 0; padding: 0; background: #f4f4f8; }
-    .container { display: flex; max-width: 100%; }
-    .side-ad { width: 20%; padding: 10px; display: none; }
-    .main { width: 60%; padding: 20px; margin: auto; background: white; border-radius: 12px; box-shadow: 0 0 10px #ccc; }
-    @media(min-width: 768px) {
-      .side-ad { display: block; }
-    }
-  </style>
 </head>
 <body>
-<?php include 'includes/navbar.php'; ?>
-<div class="container">
-  <div class="side-ad"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-9530934065893781" data-ad-slot="1234567890" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
-  <div class="main">
-    <h2>PDF to Word Converter (with OCR)</h2>
-    <form id="uploadForm">
-      <input type="file" name="file" required accept="application/pdf"><br><br>
-      <button type="submit">Convert Now</button>
-    </form>
-    <div id="result" style="margin-top:20px;"></div>
-  </div>
-  <div class="side-ad"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-9530934065893781" data-ad-slot="1234567890" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
-</div>
-<?php include 'includes/footer.php'; ?>
+  <h2>Convert PDF to Word</h2>
+  <form id="uploadForm">
+    <input type="file" name="file" accept="application/pdf" required><br><br>
+    <button type="submit">Convert Now</button>
+  </form>
 
-<script>
-document.getElementById("uploadForm").addEventListener("submit", function(e) {
-  e.preventDefault();
-  var formData = new FormData(this);
-  fetch("https://abcd1234.ngrok.io/convert", {
-    method: "POST",
-    body: formData
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.status === "success") {
-      document.getElementById("result").innerHTML = 
-        `<p><b>✅ Converted!</b> <a href="https://abcd1234.ngrok.io${data.download_url}" target="_blank">Download Word File</a></p>`;
-      fetch(`https://www.bing.com/indexnow?url=https://pdftoolslover.com/converted/${data.id}.docx&key=ec2fb07f1c6e4f81b832a3e04ae36f92`);
-    } else {
-      document.getElementById("result").innerHTML = "<p>❌ Conversion failed.</p>";
-    }
-  });
-});
-</script>
+  <div id="result"></div>
+
+  <script>
+    document.getElementById("uploadForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+
+      fetch("https://your-backend-api-url/convert", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === "success") {
+          document.getElementById("result").innerHTML =
+            `<p>✅ Converted: <a href="${data.download_url}" target="_blank">Download Word File</a></p>`;
+        } else {
+          document.getElementById("result").innerHTML = "<p>❌ Conversion failed.</p>";
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById("result").innerHTML = "<p>❌ Server not responding.</p>";
+      });
+    });
+  </script>
 </body>
 </html>
