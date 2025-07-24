@@ -21,3 +21,9 @@ A Flask-based web application that converts PDF files to Word documents with OCR
 
 ## Configuration
 Create a `.env` file to override defaults:
+## Automatic Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/pdf-to-word-converter.git
+   cd pdf-to-word-converter
