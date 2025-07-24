@@ -1,19 +1,39 @@
-.dropzone {
+/* Drop Zone Styles */
+.drop-zone {
     border: 2px dashed #0d6efd;
-    border-radius: 5px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
     cursor: pointer;
-    transition: all 0.3s;
+    background-color: rgba(13, 110, 253, 0.05);
 }
 
-.dropzone:hover {
-    background-color: #f8f9fa;
+.drop-zone:hover {
+    background-color: rgba(13, 110, 253, 0.1);
+    border-color: #0b5ed7;
 }
 
+.drop-zone-active {
+    background-color: rgba(25, 135, 84, 0.1);
+    border-color: #198754;
+}
+
+/* File Info Styles */
+#file-info {
+    transition: all 0.3s ease;
+}
+
+/* Progress Bar Styles */
 #progress-container {
-    transition: all 0.3s;
+    transition: all 0.3s ease;
 }
 
-.bi-cloud-arrow-up {
-    font-size: 3rem;
-    color: #0d6efd;
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .drop-zone {
+        padding: 2rem !important;
+    }
+    
+    .drop-zone h4 {
+        font-size: 1.2rem;
+    }
 }
