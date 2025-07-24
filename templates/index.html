@@ -302,22 +302,12 @@
             uploadArea.addEventListener('click', () => fileInput.click());
             uploadBtn.addEventListener('click', () => fileInput.click());
             
-            fileInput.addEventListener('change', handleFileSelection);
-            
-            uploadArea.addEventListener('drop', function(e) {
-                e.preventDefault();
-                if (e.dataTransfer.files.length) {
-                    fileInput.files = e.dataTransfer.files;
-                    handleFileSelection();
-                }
-            });
-            
-            function handleFileSelection() {
-                const file = fileInput.files[0];
-                if (!file) return;
+            fileInput.addEventListener('change', function() {
+                selectedFile = this.files[0];
+                if (!selectedFile) return;
                 
                 // Validate file type
-                if (!file.name.toLowerCase().endsWith('.pdf')) {
+                if (!selectedFile.name.toLowerCase().endsWith('.pdf')) {
                     statusDiv.textContent = 'Please upload a PDF file.';
                     statusDiv.className = 'error';
                     convertBtn.disabled = true;
@@ -326,7 +316,8 @@
                 }
                 
                 // Validate file size
-                if (file.size > {{ MAX_FILE_SIZE }}) {
+                const maxSize = 50 * 1024 * 1024; // 50MB
+                if (selectedFile.size > maxSize) {
                     statusDiv.textContent = 'File is too large (max 50MB).';
                     statusDiv.className = 'error';
                     convertBtn.disabled = true;
@@ -334,14 +325,22 @@
                     return;
                 }
                 
-                selectedFile = file;
-                fileInfo.textContent = `Selected: ${file.name} (${formatFileSize(file.size)})`;
+                fileInfo.textContent = `Selected: ${selectedFile.name} (${formatFileSize(selectedFile.size)})`;
                 statusDiv.textContent = '';
                 convertBtn.disabled = false;
                 
                 // Upload file immediately
                 uploadFile();
-            }
+            });
+            
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                if (e.dataTransfer.files.length) {
+                    fileInput.files = e.dataTransfer.files;
+                    const event = new Event('change');
+                    fileInput.dispatchEvent(event);
+                }
+            });
             
             function formatFileSize(bytes) {
                 if (bytes === 0) return '0 Bytes';
