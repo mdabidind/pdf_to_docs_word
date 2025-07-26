@@ -1,33 +1,39 @@
-name: Setup Environment
+name: PDF to Word Converter CI
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
-  setup:
+  test:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    
     steps:
     - uses: actions/checkout@v3
     
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.10'
+        python-version: '3.9'
     
-    - name: Install Tesseract
+    - name: Install Tesseract (Windows)
+      if: runner.os == 'Windows'
       run: |
-        chmod +x install_tesseract.sh
-        ./install_tesseract.sh
-        
+        choco install tesseract --params '"/addtopath"'
+        refreshenv
+        tesseract --version
+    
+    - name: Install Tesseract (Linux/MacOS)
+      if: runner.os != 'Windows'
+      run: |
+        sudo apt-get install tesseract-ocr -y
+        tesseract --version
+    
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        
+    
     - name: Test OCR
       run: |
-        tesseract --version
         python -c "import pytesseract; print(pytesseract.get_tesseract_version())"
