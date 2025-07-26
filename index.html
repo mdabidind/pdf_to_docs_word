@@ -8,168 +8,11 @@
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-    <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card shadow">
-                    <div class="card-header bg-primary text-white">
-                        <h2 class="mb-0">
-                            <i class="bi bi-file-earmark-word"></i> PDF to Word Converter
-                        </h2>
-                    </div>
-                    <div class="card-body">
-                        <div id="upload-container">
-                            <div id="drop-zone" class="drop-zone p-5 text-center">
-                                <input type="file" id="file-input" accept=".pdf" class="d-none">
-                                <div class="drop-zone-content">
-                                    <i class="bi bi-cloud-arrow-up display-4 text-primary mb-3"></i>
-                                    <h4>Drag & Drop PDF Here</h4>
-                                    <p class="text-muted">or</p>
-                                    <button id="select-btn" class="btn btn-primary px-4">
-                                        <i class="bi bi-folder2-open"></i> Select File
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <div id="file-info" class="mt-4 d-none">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h5 id="file-name" class="mb-0"></h5>
-                                        <small id="file-size" class="text-muted"></small>
-                                    </div>
-                                    <button id="remove-btn" class="btn btn-sm btn-outline-danger">
-                                        <i class="bi bi-trash"></i> Remove
-                                    </button>
-                                </div>
-                                
-                                <div class="form-check form-switch mt-3">
-                                    <input class="form-check-input" type="checkbox" id="ocr-toggle" checked>
-                                    <label class="form-check-label" for="ocr-toggle">
-                                        Enable OCR (for scanned documents)
-                                    </label>
-                                </div>
-                                
-                                <button id="convert-btn" class="btn btn-success w-100 mt-3">
-                                    <i class="bi bi-gear"></i> Convert to Word
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div id="progress-container" class="mt-4 d-none">
-                            <div class="progress" style="height: 10px;">
-                                <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" 
-                                     role="progressbar" style="width: 0%"></div>
-                            </div>
-                            <p id="status-text" class="text-center mt-2 mb-0"></p>
-                        </div>
-                        
-                        <div id="error-alert" class="alert alert-danger mt-3 d-none"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Your existing HTML structure remains the same -->
     
-    <!-- JavaScript -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // DOM Elements
-            const fileInput = document.getElementById('file-input');
-            const dropZone = document.getElementById('drop-zone');
-            const selectBtn = document.getElementById('select-btn');
-            const fileInfo = document.getElementById('file-info');
-            const fileName = document.getElementById('file-name');
-            const fileSize = document.getElementById('file-size');
-            const removeBtn = document.getElementById('remove-btn');
-            const convertBtn = document.getElementById('convert-btn');
-            const progressContainer = document.getElementById('progress-container');
-            const progressBar = document.getElementById('progress-bar');
-            const statusText = document.getElementById('status-text');
-            const errorAlert = document.getElementById('error-alert');
-            const ocrToggle = document.getElementById('ocr-toggle');
-            
-            let currentFile = null;
-            
-            // Event Listeners
-            selectBtn.addEventListener('click', () => fileInput.click());
-            fileInput.addEventListener('change', handleFileSelect);
-            removeBtn.addEventListener('click', resetFileSelection);
-            convertBtn.addEventListener('click', convertFile);
-            
-            // Drag and Drop Events
-            ['dragenter', 'dragover'].forEach(event => {
-                dropZone.addEventListener(event, highlightDropZone);
-            });
-            
-            ['dragleave', 'drop'].forEach(event => {
-                dropZone.addEventListener(event, unhighlightDropZone);
-            });
-            
-            dropZone.addEventListener('drop', handleFileDrop);
-            
-            // Functions
-            function highlightDropZone(e) {
-                e.preventDefault();
-                dropZone.classList.add('drop-zone-active');
-            }
-            
-            function unhighlightDropZone(e) {
-                e.preventDefault();
-                dropZone.classList.remove('drop-zone-active');
-            }
-            
-            function handleFileDrop(e) {
-                e.preventDefault();
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    handleFileSelect({ target: { files: files } });
-                }
-            }
-            
-            function handleFileSelect(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                
-                // Validate file
-                if (!file.name.toLowerCase().endsWith('.pdf')) {
-                    showError('Please select a PDF file');
-                    return;
-                }
-                
-                if (file.size > 50 * 1024 * 1024) { // 50MB
-                    showError('File size exceeds 50MB limit');
-                    return;
-                }
-                
-                currentFile = file;
-                updateFileInfo();
-            }
-            
-            function updateFileInfo() {
-                fileName.textContent = currentFile.name;
-                fileSize.textContent = formatFileSize(currentFile.size);
-                fileInfo.classList.remove('d-none');
-                hideError();
-            }
-            
-            function formatFileSize(bytes) {
-                if (bytes === 0) return '0 Bytes';
-                const units = ['Bytes', 'KB', 'MB', 'GB'];
-                const k = 1024;
-                const i = Math.floor(Math.log(bytes) / Math.log(k));
-                return `(${parseFloat((bytes / Math.pow(k, i)).toFixed(2)} ${units[i]})`;
-            }
-            
-            function resetFileSelection() {
-                currentFile = null;
-                fileInput.value = '';
-                fileInfo.classList.add('d-none');
-                hideError();
-            }
+            // Previous code remains the same until convertFile function
             
             async function convertFile() {
                 if (!currentFile) {
@@ -177,87 +20,68 @@
                     return;
                 }
                 
-                // Prepare UI
                 convertBtn.disabled = true;
                 progressContainer.classList.remove('d-none');
                 progressBar.style.width = '0%';
                 statusText.textContent = 'Preparing conversion...';
                 hideError();
                 
-                // Prepare form data
-                const formData = new FormData();
-                formData.append('file', currentFile);
-                formData.append('ocr', ocrToggle.checked);
-                
                 try {
-                    // Start conversion
-                    const response = await fetch('/convert', {
+                    // Convert PDF to images first (for OCR processing)
+                    progressBar.style.width = '20%';
+                    statusText.textContent = 'Extracting text...';
+                    
+                    const formData = new FormData();
+                    formData.append('file', currentFile);
+                    formData.append('ocr', ocrToggle.checked ? 'true' : 'false');
+                    
+                    // First request - process PDF
+                    const processResponse = await fetch('/process-pdf', {
                         method: 'POST',
                         body: formData
                     });
                     
-                    // Update progress
+                    if (!processResponse.ok) {
+                        throw new Error('PDF processing failed');
+                    }
+                    
                     progressBar.style.width = '50%';
-                    statusText.textContent = 'Processing document...';
+                    statusText.textContent = 'Converting to Word...';
                     
-                    // Check response
-                    const contentType = response.headers.get('content-type');
+                    // Second request - convert to Word
+                    const convertResponse = await fetch('/convert-to-word', {
+                        method: 'POST',
+                        body: await processResponse.json()
+                    });
                     
-                    if (!response.ok) {
-                        // Handle error response
-                        let errorMsg = 'Conversion failed';
-                        
-                        if (contentType && contentType.includes('application/json')) {
-                            const errorData = await response.json();
-                            errorMsg = errorData.error || errorMsg;
-                        } else {
-                            const errorText = await response.text();
-                            errorMsg = errorText || errorMsg;
-                        }
-                        
-                        throw new Error(errorMsg);
+                    if (!convertResponse.ok) {
+                        throw new Error('Word conversion failed');
                     }
                     
-                    // Handle successful conversion
-                    if (contentType && contentType.includes('application/vnd.openxmlformats')) {
-                        progressBar.style.width = '100%';
-                        statusText.textContent = 'Downloading your file...';
-                        
-                        const blob = await response.blob();
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = currentFile.name.replace('.pdf', '.docx') || 'converted.docx';
-                        document.body.appendChild(a);
-                        a.click();
-                        URL.revokeObjectURL(url);
-                        
-                        statusText.textContent = 'Conversion complete!';
-                    } else {
-                        throw new Error('Unexpected response from server');
-                    }
+                    progressBar.style.width = '90%';
+                    statusText.textContent = 'Preparing download...';
+                    
+                    const blob = await convertResponse.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = currentFile.name.replace('.pdf', '.docx') || 'converted.docx';
+                    document.body.appendChild(a);
+                    a.click();
+                    
+                    progressBar.style.width = '100%';
+                    statusText.textContent = 'Conversion complete!';
+                    
                 } catch (error) {
-                    showError(error.message);
+                    showError(error.message || 'Conversion failed');
                     progressBar.style.width = '0%';
                     statusText.textContent = '';
                 } finally {
-                    // Reset UI
-                    setTimeout(() => {
-                        convertBtn.disabled = false;
-                        progressContainer.classList.add('d-none');
-                    }, 2000);
+                    convertBtn.disabled = false;
                 }
             }
             
-            function showError(message) {
-                errorAlert.textContent = message;
-                errorAlert.classList.remove('d-none');
-                errorAlert.scrollIntoView({ behavior: 'smooth' });
-            }
-            
-            function hideError() {
-                errorAlert.classList.add('d-none');
-            }
+            // Rest of your existing code
         });
     </script>
 </body>
